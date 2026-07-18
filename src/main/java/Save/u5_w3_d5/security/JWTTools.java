@@ -30,7 +30,7 @@ public class JWTTools {
                     .build()
                     .parseSignedClaims(token);
         } catch (Exception ex) {
-            throw new UnauthorizedException("Token non valido o scaduto. Riesegui il login.");
+            throw new UnauthorizedException("Token non valido o scaduto.");
         }
     }
 

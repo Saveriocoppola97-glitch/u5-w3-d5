@@ -32,23 +32,28 @@ public class TokenFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new UnauthorizedException("Inserisci il token nell'Authorization Header.");
+            filterChain.doFilter(request, response);
+            return;
         }
-
         String accessToken = authHeader.substring(7);
-        jwtTools.verifyToken(accessToken);
 
-        String id = jwtTools.extractIdFromToken(accessToken);
-        User currentUser = userRepository.findById(Long.parseLong(id))
-                .orElseThrow(() -> new UnauthorizedException("Utente associato al token non trovato."));
-
-        Authentication authentication = new UsernamePasswordAuthenticationToken(
-                currentUser,
-                null,
-                List.of(new SimpleGrantedAuthority(currentUser.getRole().name()))
-        );
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        try {
+            jwtTools.verifyToken(accessToken);
+            String id = jwtTools.extractIdFromToken(accessToken);
+            User currentUser = userRepository.findById(Long.parseLong(id))
+                    .orElseThrow(() -> new UnauthorizedException("Utente associato al token [" + accessToken + "] non trovato."));
+            Authentication authentication = new UsernamePasswordAuthenticationToken(
+                    currentUser,
+                    null,
+                    List.of(new SimpleGrantedAuthority(currentUser.getRole().name()))
+            );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write("{\"message\": \"" + e.getMessage() + "\"}");
+            return;
+        }
         filterChain.doFilter(request, response);
     }
 

@@ -23,7 +23,7 @@ public class PrenotazioniService {
         Event event = eventService.findById(eventId);
 
         prenotazioniRepository.findByUserAndEvent(user, event).ifPresent(p -> {
-            throw new BadRequestException("Hai già prenotato per l' evento.");
+            throw new BadRequestException("Hai già prenotato per l'evento.");
         });
 
         long currentReservationsCount = prenotazioniRepository.findAll().stream()
