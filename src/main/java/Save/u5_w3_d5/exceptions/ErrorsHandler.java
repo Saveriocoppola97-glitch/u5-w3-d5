@@ -1,6 +1,7 @@
 package Save.u5_w3_d5.exceptions;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -26,6 +27,15 @@ public class ErrorsHandler {
     public Map<String, Object> handleUnauthorized(UnauthorizedException ex) {
         Map<String, Object> infoErrore = new HashMap<>();
         infoErrore.put("dettaglio", ex.getMessage());
+        infoErrore.put("orario", LocalDateTime.now());
+        return infoErrore;
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public Map<String, Object> handleAccessDenied(AccessDeniedException ex) {
+        Map<String, Object> infoErrore = new HashMap<>();
+        infoErrore.put("dettaglio", "Non hai i permessi necessari.");
         infoErrore.put("orario", LocalDateTime.now());
         return infoErrore;
     }
